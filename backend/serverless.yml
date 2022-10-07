@@ -1,6 +1,4 @@
 # TODO: Change the name of the org 
-org: nambi
-app: serverless-todo-app
 service: serverless-todo-app
 
 plugins:
@@ -27,6 +25,7 @@ provider:
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    AUTH_0_SECRET: 5ZNXjTY3GOxD2OYHfkae9okLR3qlXaOQ6MdXQWxKr-kMc5ZFpVf9JQeZGqxVYpQU
 
   logs:
     # Enable API Gateway logs
@@ -61,6 +60,8 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
+          - dynamodb:GetItem
+          - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX} 
 
   # TODO: Configure this function - 
