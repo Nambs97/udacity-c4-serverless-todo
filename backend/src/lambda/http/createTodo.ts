@@ -18,9 +18,11 @@ export const handler = middy(
     return {
       statusCode: 201,
       body: JSON.stringify({
-        newItem: newItem
+        item: newItem
       })
     }
+
+  }
 )
 
 handler.use(

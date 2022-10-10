@@ -1,3 +1,5 @@
+org: nambs97
+app: serverless-todo-app
 # TODO: Change the name of the org 
 service: serverless-todo-app
 
@@ -23,8 +25,8 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
-    SIGNED_URL_EXPIRATION: 300
+    ATTACHMENT_S3_BUCKET: serverless-nambi-todo-images-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 3000
     AUTH_0_SECRET: 5ZNXjTY3GOxD2OYHfkae9okLR3qlXaOQ6MdXQWxKr-kMc5ZFpVf9JQeZGqxVYpQU
 
   logs:
@@ -62,7 +64,7 @@ functions:
           - dynamodb:Query
           - dynamodb:GetItem
           - dynamodb:Scan
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX} 
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function - 
   # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
@@ -128,7 +130,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:PutItem
+          - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
@@ -164,9 +166,9 @@ resources:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-        ResponseType: MISSING_AUTHENTICATION_TOKEN
-        RestApiId: !Ref RestApi
-        StatusCode: '404'
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
     
     # TODO: Create a DynamoDB table with local secondary index and a composite key
     TodosTable:
@@ -178,14 +180,6 @@ resources:
           - AttributeName: todoId
             AttributeType: S
           - AttributeName: createdAt
-            AttributeType: S
-          - AttributeName: name
-            AttributeType: S
-          - AttributeName: dueDate
-            AttributeType: S
-          - AttributeName: done
-            AttributeType: B
-          - AttributeName: attachmentUrl
             AttributeType: S
         KeySchema:
           - AttributeName: userId

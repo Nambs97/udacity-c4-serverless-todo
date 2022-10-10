@@ -1,10 +1,11 @@
 import * as AWS from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
+//import * as AWSXRay from 'aws-xray-sdk-core'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
 
+const AWSXRay = require('aws-xray-sdk-core')
 const XAWS = AWSXRay.captureAWS(AWS)
 
 const logger = createLogger('TodosAccess')
@@ -15,17 +16,18 @@ export class TodosAccess {
 
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
-    private readonly todosTable = process.env.TODOS_TABLE) {
+    private readonly todosTable = process.env.TODOS_TABLE,
+    private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET) {
   }
 
   async getTodosForUser(userId: string): Promise<TodoItem[]> {
     logger.info('Getting all todos for the logged in user')
 
-    const result = await this.docClient.scan({
+    const result = await this.docClient.query({
       TableName: this.todosTable,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
-        ':userId': {'S': userId}
+        ':userId': userId
       },
     }).promise()
 
@@ -45,11 +47,11 @@ export class TodosAccess {
     return todo
   }
 
-  async updateTodo(userId: string, todoId: string, todo: TodoUpdate): Promise<TodoItem> {
+  async updateTodo(userId: string, todoId: string, todo: TodoUpdate): Promise<void> {
 
     logger.info('Updating an existing todo item')
 
-    const updatedTodo: TodoItem = await this.docClient.update({
+    await this.docClient.update({
       TableName: this.todosTable,
       Key: {
         userId: userId,
@@ -68,8 +70,6 @@ export class TodosAccess {
       },
       ReturnValues: "ALL_NEW"
     }).promise()
-
-    return updatedTodo
   }
 
   async updateAttachmentUrl(userId: string, todoId: string): Promise<void> {

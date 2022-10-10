@@ -24,6 +24,8 @@ export const handler = middy(
         items: todos
       })
     }
+  }
+)
 
     
 

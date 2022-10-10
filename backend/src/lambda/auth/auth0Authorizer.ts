@@ -3,7 +3,7 @@ import 'source-map-support/register'
 
 import { verify, decode } from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger'
-import Axios from 'axios'
+//import Axios from 'axios'
 import { Jwt } from '../../auth/Jwt'
 import { JwtPayload } from '../../auth/JwtPayload'
 
@@ -22,6 +22,7 @@ export const handler = async (
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
     logger.info('User was authorized', jwtToken)
+    logger.info('Cert URL', jwksUrl)
 
     return {
       principalId: jwtToken.sub,
@@ -58,6 +59,7 @@ export const handler = async (
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
+  console.log(jwt);
 
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
@@ -66,7 +68,7 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
 
   if (!authHeader.toLowerCase().startsWith('bearer')) throw new Error('Invalid authentication header')
 
-  return verify(jwt, auth0secret) as JwtPayload
+  return verify(token, auth0secret) as JwtPayload
 }
 
 function getToken(authHeader: string): string {

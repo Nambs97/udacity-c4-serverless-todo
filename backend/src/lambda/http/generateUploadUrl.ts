@@ -15,11 +15,11 @@ export const handler = middy(
     const uploadUrl = createAttachmentPresignedUrl(userId, todoId)
 
     return {
-    statusCode: 200,
-    body: JSON.stringify({
-      uploadUrl
-    })
-  }
+      statusCode: 200,
+      body: JSON.stringify({
+        uploadUrl
+      })
+    }
   }
 )
 
